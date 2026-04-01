@@ -1,0 +1,20 @@
+# Models (too large for GitHub)
+/home/yahboom/models/
+*.engine
+*.pt
+*.onnx
+*.whl
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+vla_env/
+*.egg-info/
+
+# Logs
+Log/
+*.log
+
+# System
+.DS_Store

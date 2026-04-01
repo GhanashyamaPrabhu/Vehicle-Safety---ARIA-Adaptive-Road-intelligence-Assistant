@@ -1,0 +1,13 @@
+torch>=2.10.0
+torchvision
+transformers==4.44.0
+accelerate
+bitsandbytes
+ultralytics
+opencv-python
+numpy
+scipy
+onnxruntime-gpu
+piper-tts
+huggingface_hub
+pybind11
