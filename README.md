@@ -481,6 +481,10 @@ MIT License — Free to use and modify
 **GhanashyamaPrabhu**
 GitHub: https://github.com/GhanashyamaPrabhu
 
+## 👥 Contributors
+- **Bhavya Oza** — [@bpo7912](https://github.com/bpo7912)
+- **Devam Shah** — [@Devamshah03](https://github.com/Devamshah03)
+
 ## 🙏 Acknowledgements
 - NVIDIA Jetson Team — JetPack & TensorRT
 - Microsoft — Phi-3.5 Mini model
