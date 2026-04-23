@@ -95,6 +95,25 @@ Orbbec Femto Bolt Camera
         │  Depth Map        │  ← Color visualization
         │  Alert System     │  ← Visual + Voice
         └───────────────────┘
+
+Dashboard Voice Assistant Pipeline:
+        ┌───────────────────┐
+        │  Vosk STT         │  ← Mic input (offline)
+        │  en-us-0.22       │  ← Kaldi large model
+        │  16 kHz audio     │  ← Auto-resampled
+        └───────────────────┘
+                │
+                ▼
+        ┌───────────────────┐
+        │  Ollama LLM       │  ← Natural language reply
+        │  llama3.2:1b      │  ← Lightweight local model
+        └───────────────────┘
+                │
+                ▼
+        ┌───────────────────┐
+        │  Piper TTS        │  ← Spoken response
+        │  Offline voice    │  ← No cloud needed
+        └───────────────────┘
 ```
 
 ---
@@ -106,6 +125,7 @@ Orbbec Femto Bolt Camera
 | **YOLOv8n** | Object detection | 8.8MB | TensorRT FP16 | ✅ |
 | **Phi-3.5 Mini** | Scene description | 7.64GB | 4-bit NF4 | ✅ |
 | **Piper TTS** | Voice output | ~60MB | ONNX | CPU |
+| **Vosk (en-us-0.22)** | Voice input / STT | ~1.8GB | Kaldi | CPU |
 
 ### YOLOv8n — Object Detection
 - Detects 80 object classes
@@ -128,6 +148,13 @@ Orbbec Femto Bolt Camera
 - Runs on CPU
 - No internet needed
 - Requires speaker/audio output
+
+### Vosk STT (vosk-model-en-us-0.22)
+- Offline speech-to-text engine using Kaldi
+- Large English model (~1.8GB) for best accuracy
+- Records from microphone, auto-resampled to 16 kHz
+- Runs fully on CPU — no cloud needed
+- Used in dashboard voice assistant: Vosk → Ollama LLM → Piper TTS
 
 ---
 
@@ -195,7 +222,9 @@ Distance    Zone       Action
 | OpenCV | 4.13.0 | Image processing |
 | ONNX Runtime | 1.23.0 | Model inference |
 | pyorbbecsdk | 2.0.18 | Camera SDK |
-| Piper TTS | latest | Voice synthesis |
+| Piper TTS | latest | Voice synthesis (TTS) |
+| vosk | latest | Offline speech recognition (STT) |
+| pyaudio | latest | Microphone audio capture |
 | numpy | 2.2.6 | Array processing |
 | scipy | 1.15.3 | Scientific computing |
 
@@ -292,6 +321,7 @@ pip install onnxruntime-gpu \
 pip install opencv-python numpy scipy
 pip install piper-tts pathvalidate
 pip install huggingface_hub
+pip install vosk pyaudio
 ```
 
 ### Step 4 — Link System TensorRT to venv
@@ -310,7 +340,7 @@ python3 -c "import tensorrt as trt; print(trt.__version__)"
 
 ### Step 5 — Download AI Models
 ```bash
-mkdir -p ~/models/{phi35,piper,yolo}
+mkdir -p ~/models/{phi35,piper,yolo,vosk}
 
 # YOLOv8n
 cd ~/models/yolo
@@ -331,6 +361,12 @@ wget https://huggingface.co/rhasspy/piper-voices/resolve/\
 main/en/en_US/lessac/medium/en_US-lessac-medium.onnx
 wget https://huggingface.co/rhasspy/piper-voices/resolve/\
 main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json
+
+# Vosk STT model (large, ~1.8GB)
+cd ~/models/vosk
+wget https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip
+unzip vosk-model-en-us-0.22.zip
+# Result: ~/models/vosk/vosk-model-en-us-0.22/
 ```
 
 ### Step 6 — Export YOLOv8 to TensorRT
@@ -423,9 +459,11 @@ python3 main.py
 │   ├── config.json
 │   ├── tokenizer.json
 │   └── model-*.safetensors
-└── piper/
-    ├── en_US-lessac-medium.onnx
-    └── en_US-lessac-medium.onnx.json
+├── piper/
+│   ├── en_US-lessac-medium.onnx
+│   └── en_US-lessac-medium.onnx.json
+└── vosk/
+    └── vosk-model-en-us-0.22/  ← Large offline STT model (~1.8GB)
 
 ~/pyorbbecsdk/           ← Camera SDK (built from source)
 ~/vla_env/               ← Python virtual environment
